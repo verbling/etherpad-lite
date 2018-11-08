@@ -3924,6 +3924,7 @@ function Ace2Inner(){
         }
         if ((!specialHandled) && isTypeForCmdKey && String.fromCharCode(which).toLowerCase() == "b" && (evt.metaKey || evt.ctrlKey) && padShortcutEnabled.cmdB)
         {
+	  console.log('@@@ACE INNER BOLD');
           // cmd-B (bold)
           fastIncorp(13);
           evt.preventDefault();
