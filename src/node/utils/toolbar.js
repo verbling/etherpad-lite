@@ -1,24 +1,24 @@
 /**
  * The Toolbar Module creates and renders the toolbars and buttons
  */
-var _ = require("underscore")
-  , tagAttributes
-  , tag
-  , Button
-  , ButtonsGroup
-  , Separator
-  , defaultButtonAttributes
-  , removeItem;
+var _ = require("underscore"),
+  tagAttributes,
+  tag,
+  Button,
+  ButtonsGroup,
+  Separator,
+  defaultButtonAttributes,
+  removeItem;
 
-removeItem = function(array,what) {
+removeItem = function(array, what) {
   var ax;
   while ((ax = array.indexOf(what)) !== -1) {
     array.splice(ax, 1);
   }
- return array;
+  return array;
 };
 
-defaultButtonAttributes = function (name, overrides) {
+defaultButtonAttributes = function(name, overrides) {
   return {
     command: name,
     localizationId: "pad.toolbar." + name + ".title",
@@ -26,74 +26,82 @@ defaultButtonAttributes = function (name, overrides) {
   };
 };
 
-tag = function (name, attributes, contents) {
+tag = function(name, attributes, contents) {
   var aStr = tagAttributes(attributes);
 
   if (_.isString(contents) && contents.length > 0) {
-    return '<' + name + aStr + '>' + contents + '</' + name + '>';
-  }
-  else {
-    return '<' + name + aStr + '></' + name + '>';
+    return "<" + name + aStr + ">" + contents + "</" + name + ">";
+  } else {
+    return "<" + name + aStr + "></" + name + ">";
   }
 };
 
-tagAttributes = function (attributes) {
-  attributes = _.reduce(attributes || {}, function (o, val, name) {
-    if (!_.isUndefined(val)) {
-      o[name] = val;
-    }
-    return o;
-  }, {});
+tagAttributes = function(attributes) {
+  attributes = _.reduce(
+    attributes || {},
+    function(o, val, name) {
+      if (!_.isUndefined(val)) {
+        o[name] = val;
+      }
+      return o;
+    },
+    {}
+  );
 
-  return " " + _.map(attributes, function (val, name) {
-    return "" + name + '="' + _.escape(val) + '"';
-  }).join(" ");
+  return (
+    " " +
+    _
+      .map(attributes, function(val, name) {
+        return "" + name + '="' + _.escape(val) + '"';
+      })
+      .join(" ")
+  );
 };
 
-ButtonsGroup = function () {
+ButtonsGroup = function() {
   this.buttons = [];
 };
 
-ButtonsGroup.fromArray = function (array) {
-  var btnGroup = new this;
-  _.each(array, function (btnName) {
+ButtonsGroup.fromArray = function(array) {
+  var btnGroup = new this();
+  _.each(array, function(btnName) {
     btnGroup.addButton(Button.load(btnName));
   });
   return btnGroup;
 };
 
-ButtonsGroup.prototype.addButton = function (button) {
+ButtonsGroup.prototype.addButton = function(button) {
   this.buttons.push(button);
   return this;
 };
 
-ButtonsGroup.prototype.render = function () {
+ButtonsGroup.prototype.render = function() {
   if (this.buttons.length == 1) {
     this.buttons[0].grouping = "";
-  }
-  else {
+  } else {
     _.first(this.buttons).grouping = "grouped-left";
     _.last(this.buttons).grouping = "grouped-right";
-    _.each(this.buttons.slice(1, -1), function (btn) {
-      btn.grouping = "grouped-middle"
+    _.each(this.buttons.slice(1, -1), function(btn) {
+      btn.grouping = "grouped-middle";
     });
   }
 
-  return _.map(this.buttons, function (btn) {
-    return btn.render();
-  }).join("\n");
+  return _
+    .map(this.buttons, function(btn) {
+      return btn.render();
+    })
+    .join("\n");
 };
 
-Button = function (attributes) {
+Button = function(attributes) {
   this.attributes = attributes;
 };
 
-Button.load = function (btnName) {
+Button.load = function(btnName) {
   var button = module.exports.availableButtons[btnName];
   if (button.constructor === Button || button.constructor === SelectButton) {
     return button;
-  }
-  else {
+  } else {
     return new Button(button);
   }
 };
@@ -101,28 +109,36 @@ Button.load = function (btnName) {
 _.extend(Button.prototype, {
   grouping: "",
 
-  render: function () {
+  render: function() {
     var liAttributes = {
       "data-type": "button",
-      "data-key": this.attributes.command,
+      "data-key": this.attributes.command
     };
-    return tag("li", liAttributes,
-      tag("a", { "class": this.grouping, "data-l10n-id": this.attributes.localizationId },
-        tag("button", { "class": " "+ this.attributes.class, "data-l10n-id": this.attributes.localizationId })
+    return tag(
+      "li",
+      liAttributes,
+      tag(
+        "a",
+        {
+          class: this.grouping,
+          "data-l10n-id": this.attributes.localizationId
+        },
+        tag("button", {
+          class: " " + this.attributes.class,
+          "data-l10n-id": this.attributes.localizationId
+        })
       )
     );
   }
 });
 
-
-
-var SelectButton = function (attributes) {
+var SelectButton = function(attributes) {
   this.attributes = attributes;
   this.options = [];
 };
 
 _.extend(SelectButton.prototype, Button.prototype, {
-  addOption: function (value, text, attributes) {
+  addOption: function(value, text, attributes) {
     this.options.push({
       value: value,
       text: text,
@@ -131,34 +147,35 @@ _.extend(SelectButton.prototype, Button.prototype, {
     return this;
   },
 
-  select: function (attributes) {
-      var options = [];
+  select: function(attributes) {
+    var options = [];
 
-    _.each(this.options, function (opt) {
-      var a = _.extend({
-        value: opt.value
-      }, opt.attributes);
+    _.each(this.options, function(opt) {
+      var a = _.extend(
+        {
+          value: opt.value
+        },
+        opt.attributes
+      );
 
-      options.push( tag("option", a, opt.text) );
+      options.push(tag("option", a, opt.text));
     });
     return tag("select", attributes, options.join(""));
   },
 
-  render: function () {
+  render: function() {
     var attributes = {
       id: this.attributes.id,
       "data-key": this.attributes.command,
       "data-type": "select"
     };
-    return tag("li", attributes,
-      this.select({ id: this.attributes.selectId })
-    );
+    return tag("li", attributes, this.select({ id: this.attributes.selectId }));
   }
 });
 
-Separator = function () {};
-Separator.prototype.render = function () {
-  return tag("li", { "class": "separator" });
+Separator = function() {};
+Separator.prototype.render = function() {
+  return tag("li", { class: "separator" });
 };
 
 module.exports = {
@@ -232,32 +249,32 @@ module.exports = {
     }
   },
 
-  registerButton: function (buttonName, buttonInfo) {
+  registerButton: function(buttonName, buttonInfo) {
     this.availableButtons[buttonName] = buttonInfo;
   },
 
-  button: function (attributes) {
+  button: function(attributes) {
     return new Button(attributes);
   },
-  separator: function () {
-    return (new Separator).render();
+  separator: function() {
+    return new Separator().render();
   },
-  selectButton: function (attributes) {
+  selectButton: function(attributes) {
     return new SelectButton(attributes);
   },
-  menu: function (buttons, isReadOnly) {
-    if(isReadOnly){
+  menu: function(buttons, isReadOnly) {
+    if (isReadOnly) {
       // The best way to detect if it's the left editbar is to check for a bold button
-      if(buttons[0].indexOf("bold") !== -1){
+      if (buttons[0].indexOf("bold") !== -1) {
         // Clear all formatting buttons
-        buttons = []
-      }else{
+        buttons = [];
+      } else {
         // Remove Save Revision from the right menu
-        removeItem(buttons[0],"savedrevision");
+        removeItem(buttons[0], "savedrevision");
       }
     }
 
-    var groups = _.map(buttons, function (group) {
+    var groups = _.map(buttons, function(group) {
       return ButtonsGroup.fromArray(group).render();
     });
     return groups.join(this.separator());
