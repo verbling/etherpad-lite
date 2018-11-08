@@ -35,11 +35,11 @@ var _ = require("underscore");
 /* Root path of the installation */
 exports.root = absolutePaths.findEtherpadRoot();
 console.log(
-  `xAll relative paths will be interpreted relative to the identified Etherpad base dir: ${
+  `All relative paths will be interpreted relative to the identified Etherpad base dir: ${
     exports.root
   }`
 );
-console.log("#### TEST ####");
+
 /**
  * The app title, visible e.g. in the browser window
  */
