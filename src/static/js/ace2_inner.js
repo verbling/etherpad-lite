@@ -2417,6 +2417,7 @@ function Ace2Inner(){
 
   function toggleAttributeOnSelection(attributeName)
   {
+	  console.log('IN TOGGLE ATTRIBUTE ON SELECTION');
     if (!(rep.selStart && rep.selEnd)) return;
 
     var selectionAllHasIt = true;
